@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CryptoHub.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+017326b4d820e0949a89ecc190feeaf97ce0609f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+537590e98f3a29e55f4b98eab0dc15193cd83c0b")]
 [assembly: System.Reflection.AssemblyProductAttribute("CryptoHub.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CryptoHub.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
