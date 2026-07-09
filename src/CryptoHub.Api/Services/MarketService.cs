@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CryptoHub.Api.Models;
 
 namespace CryptoHub.Api.Services;
 
@@ -11,7 +12,7 @@ public class MarketService
         _client = client;
     }
 
-    public async Task<object> GetTickerAsync(string symbol)
+    public async Task<MarketTicker> GetTickerAsync(string symbol)
     {
         var url = $"https://open-api.bingx.com/openApi/swap/v2/quote/ticker?symbol={symbol}";
 
@@ -24,11 +25,13 @@ public class MarketService
         var data = document.RootElement.GetProperty("data");
 
         var lastPrice = data.GetProperty("lastPrice").GetString();
+           
 
-        return new
+       return new MarketTicker
         {
-            symbol,
-            price = lastPrice
+        Symbol = symbol,
+
+        Price = decimal.Parse(lastPrice)
         };
     }
 }
