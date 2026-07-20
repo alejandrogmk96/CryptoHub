@@ -225,3 +225,230 @@ It is becoming the place where I’m learning to think like a backend developer.
 ☕ Quote of the Day
 
 “Don’t memorize the code. Understand why it exists.”
+
+
+
+# 📖 Developer Log - Day 3
+
+**Fecha:** 19 de julio de 2026
+
+---
+
+# Objetivo de la sesión
+
+Hoy no nos enfocamos en escribir código.
+
+El objetivo fue diseñar la arquitectura que permitirá a CryptoHub trabajar con múltiples exchanges sin depender de uno en específico.
+
+---
+
+# Situación actual
+
+Actualmente CryptoHub obtiene la información directamente desde BingX.
+
+Arquitectura actual:
+
+Cliente
+    │
+    ▼
+Program.cs
+    │
+    ▼
+MarketService
+    │
+    ▼
+BingX
+
+Este enfoque funciona para una primera versión, pero genera un fuerte acoplamiento entre MarketService y BingX.
+
+---
+
+# Problema identificado
+
+¿Qué ocurrirá cuando CryptoHub quiera soportar:
+
+- Binance
+- Bybit
+- OKX
+- Kraken
+
+?
+
+Si MarketService depende directamente de BingX, será necesario modificar código existente cada vez que se agregue un nuevo exchange.
+
+Esto hace que el sistema sea difícil de mantener y de escalar.
+
+---
+
+# Primera decisión de arquitectura
+
+CryptoHub será quien decida automáticamente qué exchange utilizar.
+
+El usuario no necesita conocer el proveedor.
+
+La API continuará siendo simple.
+
+Ejemplo:
+
+GET /market/BTC-USDT
+
+Internamente CryptoHub seleccionará el exchange adecuado.
+
+---
+
+# Estrategias analizadas
+
+Durante la sesión se analizaron tres posibles estrategias.
+
+## 1. Prioridad fija
+
+Intentar siempre BingX.
+
+Si falla:
+
+BingX → Binance → Bybit
+
+Ventajas:
+
+- Muy simple.
+
+Desventajas:
+
+- Siempre carga al mismo proveedor.
+- No aprovecha el rendimiento de otros exchanges.
+
+---
+
+## 2. Selección aleatoria
+
+Elegir un exchange al azar.
+
+Ventajas:
+
+- Distribuye la carga.
+
+Desventajas:
+
+- Puede seleccionar un exchange lento.
+
+---
+
+## 3. Selección inteligente (Elegida)
+
+CryptoHub registrará el rendimiento histórico de cada exchange.
+
+Ejemplo:
+
+Exchange      Tiempo promedio
+
+Binance       95 ms
+Bybit        120 ms
+BingX        180 ms
+
+El sistema seleccionará automáticamente el proveedor con mejor desempeño.
+
+Si el proveedor falla, CryptoHub realizará failover al siguiente disponible.
+
+---
+
+# Nuevo componente
+
+Se propuso crear un componente intermedio encargado de administrar todos los exchanges.
+
+Nombre provisional:
+
+Exchange Manager
+
+Responsabilidades:
+
+- Seleccionar el mejor exchange.
+- Administrar el failover.
+- Ocultar al resto del sistema qué proveedor está siendo utilizado.
+
+Arquitectura propuesta:
+
+Cliente
+    │
+    ▼
+Program.cs
+    │
+    ▼
+MarketService
+    │
+    ▼
+Exchange Manager
+    │
+ ┌──┴────────────┐
+ ▼               ▼
+BingX        Binance
+                 ▼
+               Bybit
+
+---
+
+# Contrato de los exchanges
+
+Durante la sesión surgió una pregunta importante:
+
+¿Qué debe saber hacer cualquier exchange?
+
+Se definió un contrato inicial.
+
+Todo exchange deberá ser capaz de:
+
+- Obtener el precio actual.
+- Obtener velas (OHLC).
+- Obtener las temporalidades disponibles.
+
+No importa cómo lo implemente internamente.
+
+Lo importante es que todos ofrezcan las mismas capacidades.
+
+---
+
+# Descubrimiento importante
+
+Antes de estudiar las interfaces de C#, comprendimos por qué son necesarias.
+
+El problema no era aprender una nueva característica del lenguaje.
+
+El problema era lograr que CryptoHub dejara de depender de BingX.
+
+Las interfaces aparecerán como la herramienta para representar ese contrato común entre todos los exchanges.
+
+---
+
+# Conceptos aprendidos
+
+- Arquitectura antes que implementación.
+- Acoplamiento.
+- Desacoplamiento.
+- Contratos.
+- Failover.
+- Selección inteligente de proveedores.
+- Responsabilidad única.
+- Dependencia hacia abstracciones.
+
+---
+
+# Reflexión
+
+Esta sesión prácticamente no tuvo código.
+
+Sin embargo, fue una de las sesiones más importantes hasta ahora.
+
+Comprendí que una buena arquitectura permite que un proyecto crezca durante años sin tener que modificar continuamente el código existente.
+
+También entendí que las interfaces no existen únicamente porque C# las tenga.
+
+Existen para resolver problemas reales de diseño.
+
+A partir de hoy comenzaré a pensar primero en la arquitectura del sistema y después en la implementación.
+
+---
+
+# Próximo objetivo
+
+Implementar el contrato que utilizarán todos los exchanges.
+
+Durante la siguiente sesión construiremos la primera interfaz de CryptoHub y conectaremos ese diseño con el código real.
