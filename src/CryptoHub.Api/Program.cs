@@ -21,7 +21,16 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/market/{symbol}", async (string symbol, MarketService marketService) =>
 {
-    return await marketService.GetTickerAsync(symbol);
+    try
+{
+    var ticker = await marketService.GetTickerAsync(symbol);
+
+    return Results.Ok(ticker);
+}
+    catch (Exception ex)
+{
+    return Results.Problem(ex.Message);
+}
 });
 
 

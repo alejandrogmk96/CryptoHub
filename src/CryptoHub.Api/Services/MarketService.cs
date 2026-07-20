@@ -14,6 +14,10 @@ public class MarketService
 
     public async Task<MarketTicker> GetTickerAsync(string symbol)
     {
+        try{
+
+            
+
         var url = $"https://open-api.bingx.com/openApi/swap/v2/quote/ticker?symbol={symbol}";
 
         var response = await _client.GetAsync(url);
@@ -33,5 +37,13 @@ public class MarketService
 
         Price = decimal.Parse(lastPrice)
         };
+        }
+
+        catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+
+    throw;
+}
     }
 }
