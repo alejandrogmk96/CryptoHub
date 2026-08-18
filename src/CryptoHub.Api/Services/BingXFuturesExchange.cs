@@ -1,6 +1,8 @@
 using System.Net.Http;
 using CryptoHub.Api.Contracts;
 using CryptoHub.Api.Models;
+using System.Text.Json;
+using CryptoHub.Api.Models.External.BingX;
 
 namespace CryptoHub.Api.Services;
 
@@ -30,6 +32,19 @@ public class BingXFuturesExchange : IExchange
         string json =
             await response.Content.ReadAsStringAsync();
 
-        throw new NotImplementedException();
+        var result =
+    JsonSerializer.Deserialize<BingXPriceResponse>(json);
+
+if (result is null)
+{
+    throw new InvalidOperationException(
+        "No se pudo deserializar la respuesta de BingX.");
+}
+var value = decimal.Parse(result.Data.LastPrice);
+
+return new Price(
+    tradingPair,
+    value,
+    DateTimeOffset.UtcNow);
     }
 }

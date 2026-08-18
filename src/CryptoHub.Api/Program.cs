@@ -1,38 +1,47 @@
-using System.Text.Json;
+using CryptoHub.Api.Contracts;
+using CryptoHub.Api.Models;
 using CryptoHub.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<MarketService>();
+
+builder.Services.AddOpenApi();
+builder.Services.AddScoped<IExchange, BingXFuturesExchange>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-//app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
-app.MapGet("/market/{symbol}", async (string symbol, MarketService marketService) =>
+app.MapGet("/market/{symbol}", async (string symbol, IExchange exchange) =>
 {
     try
-{
-    var ticker = await marketService.GetTickerAsync(symbol);
+    {
+        var parts = symbol.Split('-');
 
-    return Results.Ok(ticker);
-}
+        if (parts.Length != 2)
+        {
+            return Results.BadRequest(
+                "El símbolo debe tener el formato BTC-USDT.");
+        }
+
+        var tradingPair = new TradingPair(
+            parts[0],
+            parts[1]);
+
+        var price = await exchange.GetPriceAsync(tradingPair);
+
+        return Results.Ok(price);
+    }
     catch (Exception ex)
-{
-    return Results.Problem(ex.Message);
-}
+    {
+        return Results.Problem(ex.Message);
+    }
 });
 
-
 app.Run();
-
